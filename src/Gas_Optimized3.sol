@@ -12,14 +12,14 @@ contract GasContract {
     event WhiteListTransfer(address indexed recipient);
     event AddedToWhitelist(address userAddress, uint256 tier);
 
-    constructor(address[] memory admins, uint256) {
+    constructor(address[] memory admins, uint256) payable {
         admin1 = admins[0];
         admin2 = admins[1];
         admin3 = admins[2];
         admin4 = admins[3]; 
     }
 
-    function administrators(uint ind) external view returns (address) {
+    function administrators(uint256 ind) external view returns (address) {
         if (ind == 0) {
             return admin1;
         } else if (ind == 1) {
@@ -130,7 +130,7 @@ contract GasContract {
     function checkForAdmin(address) external pure returns(bool){
         assembly {
             mstore(0x00, 1)
-            return(0x00, 32)
+            return(0x00, 0x20)
         }
     }
 }
