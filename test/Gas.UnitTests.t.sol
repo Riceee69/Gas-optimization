@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import "forge-std/Test.sol";
-import "../src/Gas.sol";
+import "../src/Gas_Optimized3.sol";
 
 contract GasTest is Test {
     GasContract public gas;
@@ -16,6 +16,7 @@ contract GasTest is Test {
 
     function get_random_address(uint256 offset) internal returns (address) {
         uint256 time_now = vm.unixTime();
+        console.log(vm.addr(time_now + offset));
         return (vm.addr(time_now + offset));
     }
 
@@ -73,7 +74,7 @@ contract GasTest is Test {
         string calldata _name,
         uint256 _tier
     ) public {
-        _amount = bound(_amount, 0, gas.balanceOf(owner));
+        _amount = bound(_amount, 0, gas.balanceOf(owner)); // 0 to 10e8
         vm.assume(_amount > 3);
         vm.assume(bytes(_name).length < 9);
         _tier = bound(_tier, 1, 244);
@@ -93,7 +94,7 @@ contract GasTest is Test {
     function test_tiersReverts(address _userAddrs, uint256 _tier) public {
         vm.assume(_userAddrs != address(gas));
         vm.assume(_tier > 254);
-        vm.prank(owner);
+        vm.prank(owner); 
         vm.expectRevert();
         gas.addToWhitelist(_userAddrs, _tier);
     }
@@ -101,7 +102,7 @@ contract GasTest is Test {
     // Expect Event -->
     event WhiteListTransfer(address indexed);
 
-    function test_whitelistEvents(
+    function test_whitelistEvents69(
         address _recipient,
         address _sender,
         uint256 _amount,
@@ -123,11 +124,11 @@ contract GasTest is Test {
         vm.stopPrank();
     }
 
-    /* whiteTranfer balance logic. 
+    /* whiteTranfer balance logic.
         balances[senderOfTx] -= _amount;
         balances[_recipient] += _amount;
         balances[senderOfTx] += whitelist[senderOfTx];
-        balances[_recipient] -= whitelist[senderOfTx]; 
+        balances[_recipient] -= whitelist[senderOfTx];
         */
 
     // check balances update
@@ -136,16 +137,16 @@ contract GasTest is Test {
         address _recipient = get_random_address(23);
         address _sender = get_random_address(37);
 
-        uint256 _preRecipientAmount = gas.balances(_recipient) + 0;
+        uint256 _preRecipientAmount = gas.balances(_recipient) + 0;//0
         vm.assume(_recipient != address(0));
         vm.assume(_sender != address(0));
-        _amount = bound(_amount, 0, gas.balanceOf(owner));
+        _amount = bound(_amount, 0, gas.balanceOf(owner));//0-10e8
         _tier = bound(_tier, 1, 244);
         vm.assume(_amount > 3);
         vm.assume(bytes(_name).length < 9 && bytes(_name).length > 0);
         vm.startPrank(owner);
         gas.transfer(_sender, _amount, _name);
-        uint256 _preSenderAmount = gas.balances(_sender);
+        uint256 _preSenderAmount = gas.balances(_sender);//_amount
         gas.addToWhitelist(_sender, _tier);
         vm.stopPrank();
         vm.prank(_sender);
@@ -168,10 +169,10 @@ contract GasTest is Test {
         vm.assume(_amount <= totalSupply);
         vm.startPrank(owner);
 
-        uint256 ownerBal = gas.balanceOf(owner);
-        uint256 balBefore = gas.balanceOf(_recipient);
+        uint256 ownerBal = gas.balanceOf(owner);//1000000000 (10e8 - 0)
+        uint256 balBefore = gas.balanceOf(_recipient);//0
         gas.transfer(_recipient, _amount, "name");
-        uint256 balAfter = gas.balanceOf(_recipient);
+        uint256 balAfter = gas.balanceOf(_recipient);//_amount / 10e8 for owner = recipient 
 
         if (_recipient == owner) {
             assertEq(balAfter, balBefore);
